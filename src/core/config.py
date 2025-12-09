@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     Optional env vars (have sensible defaults):
         - APP_NAME, DEBUG, ENVIRONMENT
         - HOST, PORT
-        - POSTGRES_PORT
+        - POSTGRES_PORT, DB_POOL_SIZE, DB_POOL_OVERFLOW, DB_POOL_TIMEOUT
         - CORS_ORIGINS
         - STATUS_POLL_INTERVAL_SECONDS
     """
@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     postgres_host: str
     postgres_db: str
     postgres_port: int = 5432
+
+    # Database connection pool settings
+    db_pool_size: int = 5  # Number of connections to keep open
+    db_pool_overflow: int = 10  # Max extra connections when pool is exhausted
+    db_pool_timeout: int = 30  # Seconds to wait for a connection from pool
 
     @property
     def database_url(self) -> PostgresDsn:
