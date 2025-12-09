@@ -1,9 +1,18 @@
 """Pytest configuration and fixtures."""
 
+import os
 from collections.abc import AsyncIterator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+
+# Set test environment variables BEFORE importing app
+# This ensures tests don't accidentally use production config
+os.environ.setdefault("POSTGRES_USER", "test")
+os.environ.setdefault("POSTGRES_PASSWORD", "test")
+os.environ.setdefault("POSTGRES_HOST", "localhost")
+os.environ.setdefault("POSTGRES_DB", "test")
+os.environ.setdefault("ENVIRONMENT", "development")
 
 from src.main import app
 
