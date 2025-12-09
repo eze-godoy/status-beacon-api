@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import PostgresDsn, SecretStr, computed_field
+from pydantic import PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -50,10 +50,13 @@ class Settings(BaseSettings):
     postgres_db: str
     postgres_port: int = 5432
 
-    @computed_field  # type: ignore[prop-decorator]
     @property
     def database_url(self) -> PostgresDsn:
-        """Build the database URL from components."""
+        """Build the database URL from components.
+
+        Note: This is a regular property (not computed_field) to prevent
+        the URL with password from being included in serialization/logging.
+        """
         return PostgresDsn.build(
             scheme="postgresql+asyncpg",
             username=self.postgres_user,
@@ -61,6 +64,14 @@ class Settings(BaseSettings):
             host=self.postgres_host,
             port=self.postgres_port,
             path=self.postgres_db,
+        )
+
+    @property
+    def database_url_masked(self) -> str:
+        """Return database URL with password masked for logging."""
+        return (
+            f"postgresql+asyncpg://{self.postgres_user}:***@"
+            f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
     # CORS (sensible defaults for local dev)
