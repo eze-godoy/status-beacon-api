@@ -55,6 +55,16 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
         openapi_url="/openapi.json",
         lifespan=lifespan,
+        license_info={
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT",
+        },
+        openapi_tags=[
+            {
+                "name": "health",
+                "description": "Health check endpoints for monitoring API status",
+            },
+        ],
     )
 
     # CORS middleware
