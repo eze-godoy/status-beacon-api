@@ -21,6 +21,7 @@ class Settings(BaseSettings):
         - HOST, PORT
         - POSTGRES_PORT, DB_POOL_SIZE, DB_POOL_OVERFLOW, DB_POOL_TIMEOUT
         - CORS_ORIGINS
+        - RATE_LIMIT_REQUESTS, RATE_LIMIT_WINDOW_SECONDS
         - STATUS_POLL_INTERVAL_SECONDS
     """
 
@@ -81,6 +82,10 @@ class Settings(BaseSettings):
 
     # CORS (sensible defaults for local dev)
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:7007"]
+
+    # Rate limiting
+    rate_limit_requests: int = 100  # Max requests per window
+    rate_limit_window_seconds: int = 60  # Window duration in seconds
 
     # Polling (operational default)
     status_poll_interval_seconds: int = 60

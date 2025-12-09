@@ -26,6 +26,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
@@ -108,7 +109,7 @@ ignore_missing_imports = false
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["asyncpg.*", "uvicorn.*"]
+module = ["asyncpg.*", "uvicorn.*", "slowapi.*"]
 ignore_missing_imports = true
 
 [tool.pydantic-mypy]
