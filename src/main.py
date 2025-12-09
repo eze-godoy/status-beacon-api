@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from starlette.responses import Response
 
 from src import __version__
 from src.api.v1.router import api_router
@@ -20,8 +21,8 @@ limiter = Limiter(key_func=get_remote_address)
 
 def rate_limit_exceeded_handler(
     request: Request,  # noqa: ARG001
-    exc: RateLimitExceeded,  # noqa: ARG001
-) -> JSONResponse:
+    exc: Exception,  # noqa: ARG001
+) -> Response:
     """Custom handler for rate limit exceeded errors."""
     return JSONResponse(
         status_code=429,
