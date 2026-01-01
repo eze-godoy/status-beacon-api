@@ -1,0 +1,42 @@
+version: 1
+
+review:
+  depth: standard
+  focus:
+    - security
+    - best-practices
+  instructions: |
+    This is a FastAPI Python backend service.
+    Focus on Python/FastAPI best practices and idiomatic code.
+    Check for proper async/await usage and potential blocking calls.
+    Verify Pydantic models have proper validation.
+    Look for proper error handling and HTTP status codes.
+    Check for SQL injection, input validation, and authentication issues.
+
+ignore:
+  - '**/*.md'
+
+paths:
+  - pattern: 'src/core/config.py'
+    depth: security
+    instructions: 'Check for secrets exposure, proper env var handling, and secure defaults'
+  - pattern: 'src/api/**/*.py'
+    depth: deep
+    instructions: 'Check route handlers for proper validation, error handling, and security'
+  - pattern: 'src/services/**/*.py'
+    depth: standard
+    instructions: 'Check business logic for edge cases and proper error handling'
+  - pattern: 'tests/**/*.py'
+    depth: quick
+
+model:
+  id: anthropic.claude-sonnet-4-20250514-v1:0
+  maxTokens: 4096
+  temperature: 0.3
+
+pricing:
+  inputPer1M: 3.0
+  outputPer1M: 15.0
+
+output:
+  minSeverity: high
