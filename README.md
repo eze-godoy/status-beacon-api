@@ -113,13 +113,18 @@ flowchart LR
    docker compose up -d
    ```
 
-4. Verify it's running:
+4. Run database migrations:
    ```bash
-   curl http://localhost:8000/api/v1/health
-   # {"status":"healthy","version":"0.1.0"}
+   docker compose exec api alembic upgrade head
    ```
 
-5. Access the API documentation at http://localhost:8000/docs
+5. Verify it's running:
+   ```bash
+   curl http://localhost:8000/api/v1/health/ready
+   # {"status":"healthy","version":"0.1.0","database":"connected"}
+   ```
+
+6. Access the API documentation at http://localhost:8000/docs
 
 ### Local Development
 
@@ -139,7 +144,12 @@ flowchart LR
    docker compose up -d db
    ```
 
-4. Run the development server:
+4. Run database migrations:
+   ```bash
+   uv run alembic upgrade head
+   ```
+
+5. Run the development server:
    ```bash
    uv run uvicorn src.main:app --reload
    ```
@@ -164,7 +174,8 @@ Configuration is managed through environment variables. Copy `.env.example` to `
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/v1/health` | Health check |
+| `GET` | `/api/v1/health` | Basic health check |
+| `GET` | `/api/v1/health/ready` | Readiness check (includes DB connectivity) |
 | `GET` | `/api/v1/services` | List all monitored services |
 | `GET` | `/api/v1/services/{id}/status` | Get status for a specific service |
 | `GET` | `/api/v1/incidents` | List current incidents |
@@ -175,21 +186,34 @@ Configuration is managed through environment variables. Copy `.env.example` to `
 
 ```
 status-beacon-api/
+├── alembic/                   # Database migrations
+│   ├── versions/              # Migration scripts
+│   └── env.py                 # Alembic environment config
+├── scripts/
+│   └── seed_services.py       # Database seed script
 ├── src/
 │   ├── api/
+│   │   ├── dependencies.py    # FastAPI dependencies (DB session)
 │   │   └── v1/
 │   │       ├── routes/        # API endpoints
 │   │       │   └── health.py
 │   │       └── router.py      # Route aggregation
 │   ├── core/
-│   │   └── config.py          # Configuration management
-│   ├── models/                # Pydantic & SQLAlchemy models
+│   │   ├── config.py          # Configuration management
+│   │   └── database.py        # Async DB engine & session
+│   ├── models/                # SQLAlchemy models
+│   │   ├── base.py            # Base model with UUID, timestamps
+│   │   ├── enums.py           # Status enums
+│   │   ├── service.py         # Service model
+│   │   ├── service_status.py  # ServiceStatusRecord model
+│   │   └── incident.py        # Incident model
 │   ├── providers/             # Status page adapters
 │   ├── services/              # Business logic
 │   └── main.py                # Application entry point
 ├── tests/
 │   ├── api/                   # API integration tests
 │   └── unit/                  # Unit tests
+├── alembic.ini
 ├── docker-compose.yml
 ├── Dockerfile
 └── pyproject.toml
