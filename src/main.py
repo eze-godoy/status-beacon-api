@@ -14,6 +14,7 @@ from starlette.responses import Response
 from src import __version__
 from src.api.v1.router import api_router
 from src.core.config import get_settings
+from src.core.database import create_engine, create_session_factory
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -36,8 +37,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Startup
     settings = get_settings()
     app.state.settings = settings
+
+    # Initialize database
+    engine = create_engine(settings)
+    session_factory = create_session_factory(engine)
+    app.state.db_engine = engine
+    app.state.db_session_factory = session_factory
+
     yield
-    # Shutdown
+
+    # Shutdown - close database connections
+    await engine.dispose()
 
 
 def create_app() -> FastAPI:
