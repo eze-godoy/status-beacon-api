@@ -2,8 +2,9 @@
 
 from fastapi import APIRouter
 
-from src.api.v1.routes import health
+from src.api.v1.routes import health, services
 
 api_router = APIRouter()
 
 api_router.include_router(health.router)
+api_router.include_router(services.router)

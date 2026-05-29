@@ -89,6 +89,11 @@ class Settings(BaseSettings):
 
     # Polling (operational default)
     status_poll_interval_seconds: int = 60
+    background_polling_enabled: bool = True
+
+    # Provider HTTP settings
+    provider_request_timeout: float = 10.0
+    provider_connect_timeout: float = 5.0
 
 
 @lru_cache

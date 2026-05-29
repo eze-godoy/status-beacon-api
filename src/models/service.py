@@ -40,6 +40,10 @@ class Service(Base, TimestampMixin):
         default=True,
         nullable=False,
     )
+    poll_interval_seconds: Mapped[int | None] = mapped_column(
+        nullable=True,
+        default=None,
+    )
 
     status_records: Mapped[list[ServiceStatusRecord]] = relationship(
         "ServiceStatusRecord",

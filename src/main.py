@@ -15,6 +15,10 @@ from src import __version__
 from src.api.v1.router import api_router
 from src.core.config import get_settings
 from src.core.database import create_engine, create_session_factory
+from src.core.http_client import create_http_client
+from src.providers.registry import init_registry
+from src.services.status_sync import StatusSyncService
+from src.tasks.background import BackgroundPoller
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -44,9 +48,28 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.db_engine = engine
     app.state.db_session_factory = session_factory
 
+    # Initialize HTTP client for providers
+    http_client = create_http_client(settings)
+    app.state.http_client = http_client
+
+    # Initialize provider registry
+    registry = init_registry(http_client)
+    app.state.provider_registry = registry
+
+    # Initialize status sync service
+    sync_service = StatusSyncService(registry)
+    app.state.status_sync_service = sync_service
+
+    # Start background poller
+    poller = BackgroundPoller(sync_service, session_factory, settings)
+    app.state.background_poller = poller
+    await poller.start()
+
     yield
 
-    # Shutdown - close database connections
+    # Shutdown
+    await poller.stop()
+    await http_client.aclose()
     await engine.dispose()
 
 
@@ -73,6 +96,10 @@ def create_app() -> FastAPI:
             {
                 "name": "health",
                 "description": "Health check endpoints for monitoring API status",
+            },
+            {
+                "name": "services",
+                "description": "Service status management and monitoring endpoints",
             },
         ],
     )
